@@ -36,7 +36,7 @@ class Strip(object):
       self._LoadBorder(border)
 
   def _LoadBorder(self, border):
-    """Loads the pixels into the given border array."""
+    """Loads the pixels into the list for the given border."""
     x = Strip.BORDERS[border]
     y = 0
     sample_count = 0
@@ -51,14 +51,14 @@ class Strip(object):
     pixel = self._image_data[y * STRIP_WIDTH + x]
     return pixel
 
-  def _NeighborDistance(self, neighbor, edge, neighbor_edge):
-    """Returns the pixel distance for the given neighbor and edges."""
-    neighbor_pixels = neighbor.GetBorderPixels(neighbor_edge)
-    border_pixels = self.GetBorderPixels(edge)
+  def _NeighborDistance(self, neighbor, border, neighbor_border):
+    """Returns the pixel distance for the given neighbor and borders."""
+    neighbor_pixels = neighbor.GetBorderPixels(neighbor_border)
+    border_pixels = self.GetBorderPixels(border)
     distance = GetDistance(neighbor_pixels, border_pixels)
-    if distance < self._min_distances[edge]:
-      self._min_distances[edge] = distance
-      self._neighbors[edge] = neighbor
+    if distance < self._min_distances[border]:
+      self._min_distances[border] = distance
+      self._neighbors[border] = neighbor
     return distance
 
   def NeighborDistanceRight(self, neighbor):
@@ -173,19 +173,18 @@ def OrderStrips(image, strip, count):
 
 def main():
 
-  logging.basicConfig(level=logging.DEBUG)
+  #logging.basicConfig(level=logging.DEBUG)
 
   img = Image()
   img.LoadFromFile(FILE_PATH)
   strips = img.GetStrips()
-  strips_dict = {}
 
   FindNeighbors(strips)
 
   # Detect left edge:
   left_edge = DetectLeftEdge(strips)
 
-  # Create the output file and populate the image with the correctly ordered
+  # Create the output image and populate it with the correctly ordered
   # image strips:
   unshredded = Pil.new('RGBA', img.Size())
   unshredded = OrderStrips(unshredded, left_edge, 0)
